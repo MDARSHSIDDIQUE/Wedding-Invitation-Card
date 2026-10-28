@@ -189,3 +189,17 @@ html{scrollbar-color:#2c4d7e #0a1b38;scrollbar-width:thin}
   #env{animation:none}
 }
 
+
+footer .made-by,
+footer .love-note{
+  margin:12px auto 0;
+  color:var(--deep);
+  font-family:var(--script);
+  font-size:32px;
+  line-height:1.1;
+}
+footer .love-note{
+  margin-top:8px;
+  font-size:26px;
+  color:var(--gold);
+}

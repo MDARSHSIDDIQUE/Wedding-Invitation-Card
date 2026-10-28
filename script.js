@@ -7,11 +7,11 @@ var CONFIG = {
   ],
   // Events. "start" uses India time (+05:30). These are sample dates, change them.
   events: [
-    { start: "2026-12-26T18:00:00+05:30", name: "Mehndi",      desc: "An evening of henna, music and laughter" },
-    { start: "2026-12-27T16:00:00+05:30", name: "Guest Arrival", desc: "Welcome drinks and refreshments" },
-    { start: "2026-12-27T17:00:00+05:30", name: "Nikah",       desc: "The solemnisation ceremony" },
-    { start: "2026-12-27T19:30:00+05:30", name: "Dinner",      desc: "Join us for a feast" },
-    { start: "2026-12-28T13:00:00+05:30", name: "Walima",      desc: "Reception hosted by the groom’s family" }
+    { start: "2026-12-11T18:00:00+05:30", name: "Haldi",      desc: "An evening of henna, music and laughter" },
+    { start: "2026-12-12T16:00:00+05:30", name: "Guest Arrival", desc: "Welcome drinks and refreshments" },
+    { start: "2026-12-12T17:00:00+05:30", name: "Nikah",       desc: "The solemnisation ceremony" },
+    { start: "2026-12-12T19:30:00+05:30", name: "Dinner",      desc: "Join us for a feast" },
+    { start: "2026-12-13T13:00:00+05:30", name: "Walima",      desc: "Reception hosted by the groom’s family" }
   ],
   durationHours: 4,                    // length of the last event, for the calendar
   venueName: "Venue Name",
@@ -63,6 +63,7 @@ var CONFIG = {
   var sd=ist(start);
   $('dDate').textContent=months[sd.getUTCMonth()] + " " + sd.getUTCDate() + ", " + sd.getUTCFullYear();
   $('dDay').textContent=days[sd.getUTCDay()];
+  var heartDateText = sd.getUTCDate() + " " + months[sd.getUTCMonth()];
 
   ev.forEach(function(e){
     var x=ist(e.start),el=document.createElement('div');el.className='ev';
@@ -212,6 +213,7 @@ var CONFIG = {
     ctx.restore();ctx.lineJoin='round';ctx.lineWidth=2;ctx.strokeStyle='rgba(255,240,200,.95)';ctx.stroke(p);
     ctx.fillStyle='#14305a';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='italic 500 23px "Cormorant Garamond",Georgia,serif';
     ctx.fillText('A special date',W/2,H*.37);ctx.font='38px "Pinyon Script","Snell Roundhand",cursive';ctx.fillText('awaits you',W/2,H*.49);ctx.font='600 11px "Cormorant Garamond",Georgia,serif';ctx.fillStyle='rgba(20,48,90,.85)';if('letterSpacing' in ctx)ctx.letterSpacing='2px';ctx.fillText('SCRATCH TO UNCOVER',W/2,H*.61);if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+    ctx.fillStyle='#14305a';ctx.font='600 30px "Cormorant Garamond",Georgia,serif';
     var d=ctx.getImageData(0,0,sc.width,sc.height).data,t=0;
     for(var j=3;j<d.length;j+=64){if(d[j]>40)t++}
     coverTotal=t;
@@ -367,4 +369,13 @@ var CONFIG = {
   }
   $('envelope').addEventListener('click',open);
 })();
+
+
+
+
+
+
+
+
+
 
