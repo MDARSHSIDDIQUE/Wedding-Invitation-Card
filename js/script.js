@@ -225,7 +225,7 @@ var CONFIG = {
     s+='<g class="shoot"><path d="M0 0L-80 -30" stroke="url(#shootG)" stroke-width="1.600" stroke-linecap="round"/><circle r="1.700" fill="#fff6dc"/></g>';
     s+='<circle class="moonglow" cx="200" cy="42" r="44" fill="url(#moonG)"/>';
     s+='<rect width="400" height="100" fill="'+GD+'" mask="url(#mkMoon)"/>'+star8(234,34,8,'#e6cf9e')+'<g class="htw">'+star8(120,48,5,'#e6cf9e')+star8(22,200,5,'#e6cf9e')+'</g><g class="htw htw2">'+star8(300,62,4,'#e6cf9e')+star8(380,214,5,'#e6cf9e')+'</g>';
-    s+='<g class="sway">'+lantern(200,104,12,.72)+'</g>'+lantern(62,0,44,.62)+lantern(340,0,78,.55);
+    s+='<g class="sway"><g class="lan-c">'+lantern(200,104,12,.72)+'</g></g>'+lantern(62,0,44,.62)+lantern(340,0,78,.55);
     s+=mosque();
     s+='<g '+ST+'><path d="M-10 700H410M-10 716H410" /></g>';
     s+=star8(120,740,6,'#e6cf9e')+star8(200,744,7,'#e6cf9e')+star8(280,740,6,'#e6cf9e');
@@ -246,12 +246,12 @@ var CONFIG = {
       " C "+X(96)+" "+Y(50)+" "+X(80)+" "+Y(68)+" "+X(50)+" "+Y(92)+" Z";
   }
   $('hp').setAttribute('d',heart(300,276));
-  var sc=$('sc'),sw=$('sw'),prog=$('scProg'),ctx=sc.getContext('2d',{willReadFrequently:true}),done=false,drawing=false,last=null,W=0,H=0,coverTotal=0,lastCheck=0;
+  var sc=$('sc'),sw=$('sw'),prog=$('scProg'),ctx=sc.getContext('2d',{willReadFrequently:true}),done=false,drawing=false,last=null,W=0,H=0,coverTotal=0,lastCheck=0,heartPath=null;
   function paintCover(){
     W=sw.offsetWidth;H=sw.offsetHeight;
     sc.width=W*dpr;sc.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W,H);ctx.globalCompositeOperation='source-over';
-    var p=new Path2D(heart(W,H)),gr=ctx.createLinearGradient(0,0,W,H);
+    var p=heartPath=new Path2D(heart(W,H)),gr=ctx.createLinearGradient(0,0,W,H);
     gr.addColorStop(0,'#9b7435');gr.addColorStop(.5,'#e6cd86');gr.addColorStop(1,'#755324');
     ctx.fillStyle=gr;ctx.fill(p);
     // gold foil: soft sparkle dots + an inner heart border, like a real scratch card
@@ -289,11 +289,16 @@ var CONFIG = {
     sw.classList.add('revealed');prog.textContent='Revealed ✦';
     $('after').classList.add('on');burst();
   }
-  sc.addEventListener('pointerdown',function(e){sw.classList.add('touched');drawing=true;last=null;sc.setPointerCapture(e.pointerId);scratch(e)});
+  // only a touch that starts on the gold heart scratches; the empty corners around it scroll the page like normal
+  function inHeart(cx,cy){if(!heartPath)return false;var r=sc.getBoundingClientRect(),k=W/r.width;return ctx.isPointInPath(heartPath,(cx-r.left)*k*dpr,(cy-r.top)*k*dpr)}
+  sc.addEventListener('pointerdown',function(e){if(!inHeart(e.clientX,e.clientY))return;sw.classList.add('touched');drawing=true;last=null;sc.setPointerCapture(e.pointerId);scratch(e)});
   sc.addEventListener('pointermove',scratch);
   ['pointerup','pointercancel','pointerleave'].forEach(function(t){sc.addEventListener(t,function(){drawing=false;last=null;if(!done)check()})});
-  // stop phones from scrolling the page instead of scratching (iOS Safari ignores touch-action alone)
-  ['touchstart','touchmove'].forEach(function(t){sc.addEventListener(t,function(e){if(!done)e.preventDefault()},{passive:false})});
+  // a touch that starts on the heart scratches (page scroll held for that one gesture);
+  // a touch anywhere else, or any touch after the reveal, scrolls the page normally
+  var holdScroll=false;
+  sc.addEventListener('touchstart',function(e){var t=e.touches[0];holdScroll=!done&&!!t&&inHeart(t.clientX,t.clientY);if(holdScroll)e.preventDefault()},{passive:false});
+  sc.addEventListener('touchmove',function(e){if(holdScroll&&!done)e.preventDefault()},{passive:false});
   // mobile address bar firing resize must not repaint the cover and wipe the scratching; only a real width change does
   window.addEventListener('resize',function(){if(!done&&Math.abs(sw.offsetWidth-W)>1)paintCover()});
   sc.tabIndex=0;
