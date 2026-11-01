@@ -2,8 +2,11 @@
 var CONFIG = {
   // Order = order of names on the card. First one is shown on top.
   couple: [
-    { name: "Abid",   parents: "" },   // parents e.g. "Son of Mr. & Mrs. ____"
-    { name: "Ayesha", parents: "" }    // e.g. "Daughter of Mr. & Mrs. ____"
+    // name = short name used across the card; fullName, parent and address show in "The Couple" section
+    { name: "Abid",   role: "The Groom", fullName: "Mohd Abid Hafiz", relation: "Son of",      parent: "Late Md. Hafizur Rahman",
+      address: "Raja Bari, K. Hat, Purnea" },
+    { name: "Ayesha", role: "The Bride", fullName: "Ayesha Naaz",     relation: "Daughter of", parent: "Mohammad Chand",
+      address: "H.No. 29/30, Muslim Basti, Golmuri, Jamshedpur (Jharkhand)" }
   ],
   // Events. "start" uses India time (+05:30). These are sample dates, change them.
   events: [
@@ -44,8 +47,21 @@ var CONFIG = {
 
   /* ---------- text ---------- */
   $('n1').textContent=A; $('n2').textContent=B; $('lt').textContent=A+" & "+B;
-  var par=C.couple.map(function(c){return c.parents}).filter(Boolean).join(" · ");
-  if(par)$('parents').textContent=par;else $('parents').hidden=true;
+  /* ---------- the couple: groom card, "with" ornament, bride card ---------- */
+  var PIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.400" aria-hidden="true"><path d="M12 21s-7-6.200-7-11.200A7 7 0 0 1 19 9.800C19 14.800 12 21 12 21z"/><circle cx="12" cy="10" r="2.500"/></svg>';
+  C.couple.forEach(function(c,i){
+    if(i)$('couple').insertAdjacentHTML('beforeend','<div class="with" aria-hidden="true"><span>with</span></div>');
+    var d=document.createElement('div');d.className='cc';
+    d.innerHTML='<div class="role"></div><div class="fn"></div><div class="rel"></div><div class="par"></div><div class="addr">'+PIN+'<span></span></div>';
+    d.querySelector('.role').textContent=c.role||'';
+    d.querySelector('.fn').textContent=c.fullName||c.name;
+    d.querySelector('.rel').textContent=c.relation||'';
+    d.querySelector('.par').textContent=c.parent||'';
+    d.querySelector('.addr span').textContent=c.address||'';
+    if(!c.parent){d.querySelector('.rel').hidden=true;d.querySelector('.par').hidden=true}
+    if(!c.address)d.querySelector('.addr').hidden=true;
+    $('couple').appendChild(d);
+  });
   $('tagline').textContent=C.tagline;
   $('welcome').textContent=C.welcome; $('wNames').textContent=A+" & "+B; $('welcomeNote').textContent=C.welcomeNote;
   $('vName').textContent=C.venueName; $('vAddr').textContent=C.venueAddress;
@@ -134,11 +150,11 @@ var CONFIG = {
       });
     };
     document.querySelectorAll('main section, main footer').forEach(function(s){
-      if(s.classList.contains('hero')||s.querySelector('.events')||s.querySelector('.count'))return;
+      if(s.classList.contains('hero')||s.querySelector('.events')||s.querySelector('.count')||s.querySelector('.couple'))return;
       s.classList.add('rv');io.observe(s);
     });
     var stag={};
-    document.querySelectorAll('.events .ev, .count div').forEach(function(el){
+    document.querySelectorAll('.events .ev, .count div, .couple>*').forEach(function(el){
       var k=el.parentElement.id||'x';stag[k]=stag[k]||0;
       el.classList.add('rv');el.style.animationDelay=(stag[k]*.09)+'s';stag[k]++;
       io.observe(el);
