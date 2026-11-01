@@ -2,34 +2,33 @@
 var CONFIG = {
   // Order = order of names on the card. First one is shown on top.
   couple: [
-    { name: "Ayesha", parents: "" },   // parents e.g. "Daughter of Mr. & Mrs. ____"
-    { name: "Abid",   parents: "" }    // e.g. "Son of Mr. & Mrs. ____"
+    { name: "Abid",   parents: "" },   // parents e.g. "Son of Mr. & Mrs. ____"
+    { name: "Ayesha", parents: "" }    // e.g. "Daughter of Mr. & Mrs. ____"
   ],
   // Events. "start" uses India time (+05:30). These are sample dates, change them.
   events: [
-    { start: "2026-12-26T18:00:00+05:30", name: "Mehndi",      desc: "An evening of henna, music and laughter" },
-    { start: "2026-12-27T16:00:00+05:30", name: "Guest Arrival", desc: "Welcome drinks and refreshments" },
-    { start: "2026-12-27T17:00:00+05:30", name: "Nikah",       desc: "The solemnisation ceremony" },
-    { start: "2026-12-27T19:30:00+05:30", name: "Dinner",      desc: "Join us for a feast" },
-    { start: "2026-12-28T13:00:00+05:30", name: "Walima",      desc: "Reception hosted by the groom’s family" }
+    { start: "2026-12-11T18:00:00+05:30", name: "Haldi",      desc: "An evening of colour, music and laughter with family" },
+    { start: "2026-12-12T17:00:00+05:30", name: "Nikah",       desc: "The blessed solemnisation of the Nikah" },
+    { start: "2026-12-13T19:30:00+05:30", name: "Taam-e-Walima", desc: "The Walima feast, hosted by the groom’s family" }
   ],
+  mainEvent: "Taam-e-Walima",         // the date shown on the scratch card, countdown and footer
   durationHours: 4,                    // length of the last event, for the calendar
-  venueName: "Venue Name",
-  venueAddress: "Street, Area, City, State",
-  mapQuery: "Venue Name, City",
-  welcome: "With the blessings of Allah, we joyfully invite you and your family to be part of our celebration as Ayesha and Abid begin their life together. Your presence and duas will make this day complete.",
+  venueName: "The Rose Banquet",
+  venueAddress: "Madhopara, Purnea, Bihar",
+  mapQuery: "The Rose Banquet, Madhopara, Purnea, Bihar",
+  tagline: "Two hearts. One beautiful beginning. A lifetime, Insha’Allah.",
+  welcome: "In the name of Allah, the Most Merciful, the Most Compassionate, we request the honour of your presence at the Nikah ceremony of",
+  welcomeNote: "As two hearts begin a beautiful journey together, your presence and prayers will make this blessed occasion even more special.",
   // Our Story milestones (sample text, replace with your own). Add or remove items freely.
   story: [
-    { when: "Chapter One",   title: "Where It Began",     text: "A few warm words about how Ayesha and Abid first met." },
+    { when: "Chapter One",   title: "Where It Began",     text: "A few warm words about how Abid and Ayesha first met." },
     { when: "Chapter Two",   title: "Two Families, One Dua", text: "The day both families met and said yes, alhamdulillah." },
     { when: "Chapter Three", title: "Forever Begins",     text: "Now we begin our journey together, and we want you with us." }
   ],
   transport: "Parking is available at the venue. For help with rides or pickups, please contact the family.",
   accommodation: "Rooms for out-of-town guests are arranged nearby. Please let us know in advance.",
-  rsvpPhone: "",                       // e.g. "919876543210" (country code, no +)
-  rsvpPhoneDisplay: "",                // e.g. "+91 98765 43210"
   photos: [],                          // optional photo URLs / data URIs shown after the scratch card
-  hosts: "With love, the families of Ayesha & Abid"
+  hosts: "With love, the families of Abid & Ayesha"
 };
 /* ================================================= */
 
@@ -40,14 +39,15 @@ var CONFIG = {
   var dpr=Math.min(2,window.devicePixelRatio||1);
   var A=C.couple[0].name,B=C.couple[1].name;
   var ev=C.events.slice().sort(function(a,b){return new Date(a.start)-new Date(b.start)});
-  var nikah=ev.filter(function(e){return /nikah/i.test(e.name)})[0]||ev[0];
-  var start=new Date(nikah.start), endAll=new Date(new Date(ev[ev.length-1].start).getTime()+C.durationHours*3600000);
+  var main=ev.filter(function(e){return e.name===C.mainEvent})[0]||ev.filter(function(e){return /nikah/i.test(e.name)})[0]||ev[0];
+  var start=new Date(main.start), endAll=new Date(new Date(ev[ev.length-1].start).getTime()+C.durationHours*3600000);
 
   /* ---------- text ---------- */
   $('n1').textContent=A; $('n2').textContent=B; $('lt').textContent=A+" & "+B;
   var par=C.couple.map(function(c){return c.parents}).filter(Boolean).join(" · ");
   if(par)$('parents').textContent=par;else $('parents').hidden=true;
-  $('welcome').textContent=C.welcome;
+  $('tagline').textContent=C.tagline;
+  $('welcome').textContent=C.welcome; $('wNames').textContent=A+" & "+B; $('welcomeNote').textContent=C.welcomeNote;
   $('vName').textContent=C.venueName; $('vAddr').textContent=C.venueAddress;
   $('mapbtn').href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(C.mapQuery);
   $('transport').textContent=C.transport;
@@ -61,12 +61,20 @@ var CONFIG = {
   function ist(d){return new Date(new Date(d).getTime()+330*60000)}
   function clock(d){var x=ist(d),h=x.getUTCHours(),m=x.getUTCMinutes();return (h%12||12)+":"+String(m).padStart(2,'0')+" "+(h<12?"AM":"PM")}
   var sd=ist(start);
-  $('dDate').textContent=months[sd.getUTCMonth()] + " " + sd.getUTCDate() + ", " + sd.getUTCFullYear();
-  $('dDay').textContent=days[sd.getUTCDay()];
+  $('dDate').textContent=String(sd.getUTCDate()).padStart(2,'0') + " " + months[sd.getUTCMonth()] + " " + sd.getUTCFullYear();
+  $('dDay').textContent=clock(start) + " · " + C.venueName;
+  $('fDate').textContent=String(sd.getUTCDate()).padStart(2,'0')+" "+months[sd.getUTCMonth()]+" "+sd.getUTCFullYear()+" · "+clock(start);
 
+  var ICONS={
+    hand:'<path d="M7.500 12.500V6.800a1.250 1.250 0 0 1 2.500 0V11M10 11V4.800a1.250 1.250 0 0 1 2.500 0V11M12.500 11V5.600a1.250 1.250 0 0 1 2.500 0v5.900M15 11.500V8a1.250 1.250 0 0 1 2.500 0v5.500c0 4-2.400 7-6 7-2.600 0-4-1.300-5.300-3.400L4 13.600a1.300 1.300 0 0 1 2-1.600l1.500 1.600"/><circle cx="11.800" cy="15.600" r="1.500"/><g fill="currentColor" stroke="none"><circle cx="11.800" cy="12.700" r=".5"/><circle cx="9.200" cy="15.600" r=".5"/><circle cx="14.400" cy="15.600" r=".5"/><circle cx="11.800" cy="18.400" r=".5"/></g>',
+    rings:'<circle cx="9" cy="14.500" r="5"/><circle cx="15" cy="14.500" r="5"/><path d="M15 9.500l-1.600-2.200L15 5.200l1.600 2.100z"/>',
+    plate:'<circle cx="12.200" cy="13" r="5.400"/><circle cx="12.200" cy="13" r="3.200"/><path d="M3 4v4.200a1.500 1.500 0 0 0 3 0V4M4.500 9.700V21M21 4c-1.500 1-2.300 3.300-2.300 6.400H21V21"/>',
+    star:'<path d="M12 3 14 10 21 12 14 14 12 21 10 14 3 12 10 10Z"/>'
+  };
+  function evIcon(n){return /haldi|mehndi|mayun/i.test(n)?ICONS.hand:/nikah/i.test(n)?ICONS.rings:/walima|dinner|reception/i.test(n)?ICONS.plate:ICONS.star}
   ev.forEach(function(e){
     var x=ist(e.start),el=document.createElement('div');el.className='ev';
-    el.innerHTML='<div class="dt"><div class="dd"></div><div class="mm"></div></div><div><div class="n"></div><div class="t"></div><div class="d"></div></div>';
+    el.innerHTML='<div class="node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.300" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+evIcon(e.name)+'</svg></div><div class="dt"><div class="dd"></div><div class="mm"></div></div><div><div class="n"></div><div class="t"></div><div class="d"></div></div>';
     el.querySelector('.dd').textContent=x.getUTCDate();
     el.querySelector('.mm').textContent=months[x.getUTCMonth()].slice(0,3);
     el.querySelector('.n').textContent=e.name;
@@ -75,21 +83,33 @@ var CONFIG = {
     $('events').appendChild(el);
   });
 
-  if(C.photos&&C.photos.length){C.photos.forEach(function(u){var i=new Image();i.src=u;i.alt="";$('galGrid').appendChild(i)});$('gal').hidden=false}
+  /* ---------- timeline: gold line draws down as you scroll, icons light up ---------- */
+  var evWrap=$('events');
+  function tl(){
+    var r=evWrap.getBoundingClientRect(),p=Math.max(0,Math.min(1,(innerHeight*.8-r.top)/r.height));
+    evWrap.style.setProperty('--tl',p.toFixed(3));
+    evWrap.querySelectorAll('.ev').forEach(function(e){e.classList.toggle('lit',e.offsetTop+e.offsetHeight/2<=p*r.height+2)});
+  }
+  if(reduce){evWrap.style.setProperty('--tl',1);evWrap.querySelectorAll('.ev').forEach(function(e){e.classList.add('lit')})}
+  else{var tlq=false;addEventListener('scroll',function(){if(!tlq){tlq=true;requestAnimationFrame(function(){tlq=false;tl()})}},{passive:true});addEventListener('resize',tl);tl()}
 
-  if(C.rsvpPhone){
-    $('rsvpNum').textContent=C.rsvpPhoneDisplay||("+"+C.rsvpPhone);
-    $('rsvpbtn').href="https://wa.me/"+C.rsvpPhone+"?text="+encodeURIComponent("Assalamualaikum! I will be attending the wedding of "+A+" & "+B+", in sha Allah.");
-  }else{$('rsvpNum').hidden=true;$('rsvpbtn').hidden=true;$('rsvpText').textContent="Please let the family know you are coming, in sha Allah."}
-  $('sharebtn').href="https://wa.me/?text="+encodeURIComponent("You are invited to the wedding of "+A+" & "+B+"\n"+location.href);
+  if(C.photos&&C.photos.length){C.photos.forEach(function(u){var i=new Image();i.src=u;i.alt="";$('galGrid').appendChild(i)});$('gal').hidden=false}
 
   function g(d){return d.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'')}
   $('calbtn').href="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(A+" & "+B+" Wedding")+
     "&dates="+g(new Date(ev[0].start))+"/"+g(endAll)+"&location="+encodeURIComponent(C.venueName+", "+C.venueAddress)+
-    "&details="+encodeURIComponent("Nikah: "+sd.getUTCDate()+" "+months[sd.getUTCMonth()]+", "+clock(start));
+    "&details="+encodeURIComponent(main.name+": "+sd.getUTCDate()+" "+months[sd.getUTCMonth()]+", "+clock(start));
 
   /* ---------- countdown ---------- */
-  function setT(id,v){var el=$(id);if(el.textContent!==v){el.textContent=v;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}}
+  // flip card: static top = new, static bottom = old; top flap folds the old value down, bottom flap unfolds the new one
+  function flipHTML(o,n){return '<span class="flip"><span class="sz">'+n+'</span><span class="h u"><span>'+n+'</span></span><span class="h l"><span>'+o+'</span></span><span class="h fu"><span>'+o+'</span></span><span class="h fl"><span>'+n+'</span></span></span>'}
+  var cur={};
+  function setT(id,v){
+    var el=$(id),o=cur[id];if(o===v)return;cur[id]=v;
+    if(o===undefined||reduce){el.innerHTML=flipHTML(v,v);return}
+    el.innerHTML=flipHTML(o,v);var f=el.firstChild;void f.offsetWidth;f.classList.add('go');
+    setTimeout(function(){if(cur[id]===v)el.innerHTML=flipHTML(v,v)},650);
+  }
   function tick(){
     var s=Math.max(0,Math.floor((start-new Date())/1000));
     setT('cd',String(Math.floor(s/86400)));
@@ -123,11 +143,14 @@ var CONFIG = {
       el.classList.add('rv');el.style.animationDelay=(stag[k]*.09)+'s';stag[k]++;
       io.observe(el);
     });
-    // anything already on screen (hidden behind the door) shows without a flash
     document.querySelectorAll('.rv').forEach(function(el){
       if(el.offsetParent&&el.getBoundingClientRect().top<innerHeight*.92)reveal(el);
     });
   }
+
+  /* ---------- section dividers draw themselves ---------- */
+  var drawIO=(!reduce&&'IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('drawn');drawIO.unobserve(e.target)}})},{threshold:.15}):null;
+  document.querySelectorAll('section.rule').forEach(function(s){if(drawIO)drawIO.observe(s);else s.classList.add('drawn')});
 
   /* ---------- Islamic hero illustration ---------- */
   var ST='fill="none" stroke="#d9bd86" stroke-opacity=".85" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"';
@@ -173,18 +196,20 @@ var CONFIG = {
     var s='';
     s+='<defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1d3a" stop-opacity="0"/><stop offset="1" stop-color="#081630" stop-opacity=".85"/></linearGradient>'+
        '<radialGradient id="glow" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#f0c878" stop-opacity=".5"/><stop offset=".5" stop-color="#c9a45f" stop-opacity=".15"/><stop offset="1" stop-color="#c9a45f" stop-opacity="0"/></radialGradient>'+
-       '<mask id="mkMoon"><rect width="400" height="100" fill="#000"/><circle cx="200" cy="42" r="23" fill="#fff"/><circle cx="210" cy="36" r="19" fill="#000"/></mask></defs>';
+       '<mask id="mkMoon"><rect width="400" height="100" fill="#000"/><circle cx="200" cy="42" r="23" fill="#fff"/><circle cx="210" cy="36" r="19" fill="#000"/></mask>'+
+       '<radialGradient id="moonG"><stop offset="0" stop-color="#ffe7ad" stop-opacity=".55"/><stop offset=".45" stop-color="#f0c878" stop-opacity=".18"/><stop offset="1" stop-color="#f0c878" stop-opacity="0"/></radialGradient>'+
+       '<linearGradient id="shootG" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="-80" y2="-30"><stop offset="0" stop-color="#fff6dc"/><stop offset="1" stop-color="#fff6dc" stop-opacity="0"/></linearGradient></defs>';
     s+='<rect width="400" height="800" fill="url(#hg)"/>';
-    // mihrab arch
     s+='<path d="M34 700V340C34 220 150 150 200 80C250 150 366 220 366 340V700Z" fill="#1d4278" fill-opacity=".38"/>';
     s+='<ellipse cx="200" cy="360" rx="150" ry="230" fill="url(#glow)"/>';
     s+='<path d="M34 700V340C34 220 150 150 200 80C250 150 366 220 366 340V700" '+ST+' stroke-width="1.6"/>';
     s+='<path d="M48 700V340C48 232 156 166 200 104C244 166 352 232 352 340V700" '+ST+' stroke="'+GD+'" stroke-width="1"/>';
-    // moon and stars
+    // night sky: tiny twinkling stars, each on its own rhythm
+    for(var si=0;si<46;si++)s+='<circle class="sky" cx="'+(Math.random()*400).toFixed(1)+'" cy="'+(6+Math.random()*500).toFixed(1)+'" r="'+(.5+Math.random()*1.1).toFixed(2)+'" fill="#fff3d6" style="animation-delay:-'+(Math.random()*4).toFixed(2)+'s;animation-duration:'+(2.5+Math.random()*3).toFixed(2)+'s"/>';
+    s+='<g class="shoot"><path d="M0 0L-80 -30" stroke="url(#shootG)" stroke-width="1.600" stroke-linecap="round"/><circle r="1.700" fill="#fff6dc"/></g>';
+    s+='<circle class="moonglow" cx="200" cy="42" r="44" fill="url(#moonG)"/>';
     s+='<rect width="400" height="100" fill="'+GD+'" mask="url(#mkMoon)"/>'+star8(234,34,8,'#e6cf9e')+'<g class="htw">'+star8(120,48,5,'#e6cf9e')+star8(22,200,5,'#e6cf9e')+'</g><g class="htw htw2">'+star8(300,62,4,'#e6cf9e')+star8(380,214,5,'#e6cf9e')+'</g>';
-    // lanterns
     s+='<g class="sway">'+lantern(200,104,12,.72)+'</g>'+lantern(62,0,44,.62)+lantern(340,0,78,.55);
-    // mosque and ground
     s+=mosque();
     s+='<g '+ST+'><path d="M-10 700H410M-10 716H410" /></g>';
     s+=star8(120,740,6,'#e6cf9e')+star8(200,744,7,'#e6cf9e')+star8(280,740,6,'#e6cf9e');
@@ -193,8 +218,6 @@ var CONFIG = {
   $('heroArt').innerHTML=heroArt();
 
   /* ---------- scratch card ---------- */
-  // Symmetric heart: two round lobes, a clean V-notch at the top centre, smooth taper to a point.
-  // Coordinates are percentages of w/h, so it scales to any card size.
   function heart(w,h){
     function X(v){return (w*v/100).toFixed(2)}
     function Y(v){return (h*v/100).toFixed(2)}
@@ -207,44 +230,56 @@ var CONFIG = {
       " C "+X(96)+" "+Y(50)+" "+X(80)+" "+Y(68)+" "+X(50)+" "+Y(92)+" Z";
   }
   $('hp').setAttribute('d',heart(300,276));
-  var sc=$('sc'),sw=$('sw'),ctx=sc.getContext('2d'),done=false,drawing=false,W=0,H=0,coverTotal=0,lastCheck=0;
+  var sc=$('sc'),sw=$('sw'),prog=$('scProg'),ctx=sc.getContext('2d',{willReadFrequently:true}),done=false,drawing=false,last=null,W=0,H=0,coverTotal=0,lastCheck=0;
   function paintCover(){
-    var r=sw.getBoundingClientRect();W=r.width;H=r.height;
+    W=sw.offsetWidth;H=sw.offsetHeight;
     sc.width=W*dpr;sc.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W,H);ctx.globalCompositeOperation='source-over';
     var p=new Path2D(heart(W,H)),gr=ctx.createLinearGradient(0,0,W,H);
-    gr.addColorStop(0,'#b8924f');gr.addColorStop(.45,'#f3e2b4');gr.addColorStop(1,'#c9a45f');
-    ctx.fillStyle=gr;ctx.fill(p);ctx.save();ctx.clip(p);ctx.strokeStyle='rgba(120,85,25,.22)';ctx.lineWidth=1;for(var gx=0;gx<W+30;gx+=30)for(var gy=0;gy<H+30;gy+=30){ctx.beginPath();ctx.moveTo(gx,gy-10);ctx.lineTo(gx+10,gy);ctx.lineTo(gx,gy+10);ctx.lineTo(gx-10,gy);ctx.closePath();ctx.stroke()}
-    for(var i=0;i<260;i++){var yy=Math.random()*H,am=Math.random()>.5?'255,255,255':'90,60,10';ctx.strokeStyle='rgba('+am+','+(Math.random()*.16)+')';ctx.lineWidth=Math.random()*1.4+.3;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(W,yy+(Math.random()-.5)*20);ctx.stroke();ctx.fillStyle='rgba(255,255,255,'+(Math.random()*.5)+')';ctx.fillRect(Math.random()*W,Math.random()*H,1.6,1.6)}
+    gr.addColorStop(0,'#9b7435');gr.addColorStop(.5,'#e6cd86');gr.addColorStop(1,'#755324');
+    ctx.fillStyle=gr;ctx.fill(p);
+    // gold foil: soft sparkle dots + an inner heart border, like a real scratch card
+    ctx.save();ctx.clip(p);ctx.fillStyle='rgba(255,255,255,.12)';
+    for(var i=0;i<90;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.5+.3,0,6.283);ctx.fill()}
+    ctx.translate(W/2,H/2);ctx.scale(.86,.86);ctx.translate(-W/2,-H/2);ctx.lineWidth=1/.86;ctx.strokeStyle='rgba(50,35,12,.28)';ctx.stroke(p);
     ctx.restore();ctx.lineJoin='round';ctx.lineWidth=2;ctx.strokeStyle='rgba(255,240,200,.95)';ctx.stroke(p);
-    ctx.fillStyle='#14305a';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='italic 500 23px "Cormorant Garamond",Georgia,serif';
-    ctx.fillText('A special date',W/2,H*.37);ctx.font='38px "Pinyon Script","Snell Roundhand",cursive';ctx.fillText('awaits you',W/2,H*.49);ctx.font='600 11px "Cormorant Garamond",Georgia,serif';ctx.fillStyle='rgba(20,48,90,.85)';if('letterSpacing' in ctx)ctx.letterSpacing='2px';ctx.fillText('SCRATCH TO UNCOVER',W/2,H*.61);if('letterSpacing' in ctx)ctx.letterSpacing='0px';
     var d=ctx.getImageData(0,0,sc.width,sc.height).data,t=0;
     for(var j=3;j<d.length;j+=64){if(d[j]>40)t++}
-    coverTotal=t;
+    coverTotal=t;prog.textContent='0% revealed';
   }
   paintCover();
-  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(!done)paintCover()});
   function scratch(e){
     if(!drawing||done)return;
-    var r=sc.getBoundingClientRect();ctx.globalCompositeOperation='destination-out';
-    ctx.beginPath();ctx.arc(e.clientX-r.left,e.clientY-r.top,25,0,6.283);ctx.fill();
-    var n=Date.now();if(n-lastCheck>140){lastCheck=n;check()}
+    var r=sc.getBoundingClientRect(),k=W/r.width,x=(e.clientX-r.left)*k,y=(e.clientY-r.top)*k;
+    flakes(e.clientX,e.clientY,last?2:6);
+    ctx.globalCompositeOperation='destination-out';ctx.lineWidth=W*.12;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();
+    if(last){ctx.moveTo(last.x,last.y);ctx.lineTo(x,y);ctx.stroke()}else{ctx.arc(x,y,W*.06,0,6.283);ctx.fill()}
+    last={x:x,y:y};
+    var n=Date.now();if(n-lastCheck>60){lastCheck=n;check()}
   }
   function check(){
-    var d=ctx.getImageData(0,0,sc.width,sc.height).data,c=0;
-    for(var i=3;i<d.length;i+=64){if(d[i]<40)c++}
-    if(coverTotal&&c/coverTotal>.5)finish();
+    // count gold still left on the heart; the corners outside the heart are always transparent, so they must not count as scratched
+    var d=ctx.getImageData(0,0,sc.width,sc.height).data,left=0;
+    for(var i=3;i<d.length;i+=64){if(d[i]>40)left++}
+    if(!coverTotal)return;
+    var pct=Math.max(0,Math.min(100,Math.round((coverTotal-left)/coverTotal*100)));
+    prog.textContent=pct+'% revealed';
+    if(pct>=45)finish();
   }
   function finish(){
     if(done)return;done=true;
     sc.style.transition='opacity .8s';sc.style.opacity='0';sc.style.pointerEvents='none';
+    sw.classList.add('revealed');prog.textContent='Revealed ✦';
     $('after').classList.add('on');burst();
   }
-  sc.addEventListener('pointerdown',function(e){drawing=true;sc.setPointerCapture(e.pointerId);scratch(e)});
+  sc.addEventListener('pointerdown',function(e){sw.classList.add('touched');drawing=true;last=null;sc.setPointerCapture(e.pointerId);scratch(e)});
   sc.addEventListener('pointermove',scratch);
-  ['pointerup','pointercancel'].forEach(function(t){sc.addEventListener(t,function(){drawing=false;if(!done)check()})});
-  window.addEventListener('resize',function(){if(!done)paintCover()});
+  ['pointerup','pointercancel','pointerleave'].forEach(function(t){sc.addEventListener(t,function(){drawing=false;last=null;if(!done)check()})});
+  // stop phones from scrolling the page instead of scratching (iOS Safari ignores touch-action alone)
+  ['touchstart','touchmove'].forEach(function(t){sc.addEventListener(t,function(e){if(!done)e.preventDefault()},{passive:false})});
+  // mobile address bar firing resize must not repaint the cover and wipe the scratching; only a real width change does
+  window.addEventListener('resize',function(){if(!done&&Math.abs(sw.offsetWidth-W)>1)paintCover()});
   sc.tabIndex=0;
   sc.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();finish()}});
 
@@ -252,10 +287,13 @@ var CONFIG = {
   var pc=$('petals'),px=pc.getContext('2d'),parts=[],running=false,fallUntil=0;
   function size(){pc.width=innerWidth*dpr;pc.height=innerHeight*dpr;px.setTransform(dpr,0,0,dpr,0,0)}
   size();addEventListener('resize',size);
-  var cols=['#d9bd86','#f3e2b4','#ffffff','#b08d57','#e8d3a8','#8fb2dc'];
-  function petal(x,y,vy,b){return{x:x,y:y,vx:b?(Math.random()-.5)*9:0,vy:b?-(Math.random()*9+3):vy,r:Math.random()*6+4,a:Math.random()*6.28,va:(Math.random()-.5)*.1,c:cols[Math.random()*cols.length|0],life:b?140:0,sw:Math.random()*6.28,burst:b}}
-  function burst(){if(reduce)return;var r=sw.getBoundingClientRect();for(var i=0;i<80;i++)parts.push(petal(r.left+r.width/2,r.top+r.height/2,0,true));run()}
-  function fall(){if(reduce)return;fallUntil=Date.now()+10000;for(var i=0;i<26;i++)parts.push(petal(Math.random()*innerWidth,-Math.random()*innerHeight,Math.random()*1.1+.5,false));run()}
+  var petalCols=['#fff4e6','#f9e3e3','#f4c6c6','#e8a7a7','#f3e2b4','#d9bd86'];
+  var heartCols=['#f0c878','#e6cd86','#f4c6c6','#fff4e6','#e8a7a7','#d9bd86'];
+  function petal(x,y,vy,b){var c=b?heartCols:petalCols;return{x:x,y:y,vx:b?(Math.random()-.5)*9:0,vy:b?-(Math.random()*9+3):vy,r:b?Math.random()*5+4:Math.random()*5+5,a:Math.random()*6.28,va:(Math.random()-.5)*(b?.08:.04),fl:Math.random()*6.28,vfl:.02+Math.random()*.04,c:c[Math.random()*c.length|0],life:b?140:0,sw:Math.random()*6.28,burst:b}}
+  function burst(){if(reduce)return;var r=sw.getBoundingClientRect();for(var i=0;i<60;i++)parts.push(petal(r.left+r.width/2,r.top+r.height*.45,0,true));run()}
+  function fall(){if(reduce)return;fallUntil=Date.now()+10000;for(var i=0;i<30;i++)parts.push(petal(Math.random()*innerWidth,-Math.random()*innerHeight,Math.random()*1.1+.5,false));run()}
+  function drawHeart(r){px.moveTo(0,r*.9);px.bezierCurveTo(-r*1.2,0,-r*.9,-r,0,-r*.35);px.bezierCurveTo(r*.9,-r,r*1.2,0,0,r*.9)}
+  function drawPetal(r){px.moveTo(0,r);px.bezierCurveTo(r*.95,r*.55,r*.8,-r*.75,r*.18,-r);px.quadraticCurveTo(0,-r*.78,-r*.18,-r);px.bezierCurveTo(-r*.8,-r*.75,-r*.95,r*.55,0,r)}
   function run(){if(running)return;running=true;requestAnimationFrame(loop)}
   function loop(){
     px.clearRect(0,0,innerWidth,innerHeight);
@@ -263,35 +301,28 @@ var CONFIG = {
       var p=parts[i];
       if(p.burst){p.vy+=.28;p.vx*=.985;p.life--;if(p.life<=0){parts.splice(i,1);continue}}
       else{p.sw+=.03;p.vx=Math.sin(p.sw)*.7;if(p.y>innerHeight+10){if(Date.now()>fallUntil){parts.splice(i,1);continue}p.y=-10;p.x=Math.random()*innerWidth}}
-      p.x+=p.vx;p.y+=p.vy;p.a+=p.va;
-      px.save();px.translate(p.x,p.y);px.rotate(p.a);px.globalAlpha=p.burst?Math.min(1,p.life/40):.85;
-      px.fillStyle=p.c;px.beginPath();px.moveTo(0,-p.r);px.lineTo(p.r*.6,0);px.lineTo(0,p.r);px.lineTo(-p.r*.6,0);px.closePath();px.fill();px.restore();
+      p.x+=p.vx;p.y+=p.vy;p.a+=p.va;p.fl+=p.vfl;
+      px.save();px.translate(p.x,p.y);px.rotate(p.a);px.globalAlpha=p.burst?Math.min(1,p.life/40):.9;
+      px.fillStyle=p.c;px.beginPath();
+      if(p.burst){drawHeart(p.r);px.fill()}
+      else{px.scale(Math.cos(p.fl),1);drawPetal(p.r);px.fill();px.strokeStyle='rgba(255,255,255,.4)';px.lineWidth=.6;px.beginPath();px.moveTo(0,p.r*.8);px.quadraticCurveTo(p.r*.12,0,0,-p.r*.7);px.stroke()}
+      px.restore();
     }
     if(parts.length)requestAnimationFrame(loop);else{running=false;px.clearRect(0,0,innerWidth,innerHeight)}
   }
 
-  /* ---------- soft ambient music (generated, no audio file) ---------- */
-  var ac=null,timer=null,playing=false,snd=$('sound');
-  var notes=[392,440,523.25,587.33,659.25,783.99,659.25,587.33,523.25,440];
-  function note(f,t,d,v){
-    var o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.04);g.gain.exponentialRampToValueAtTime(.0001,t+d);
-    o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.05);
-  }
-  function chordLoop(){
-    var t=ac.currentTime+.05,k=0;
-    function bar(){
-      var base=[196,174.61,220,196][k%4];note(base,ac.currentTime,3.6,.07);note(base*1.5,ac.currentTime,3.6,.04);note(base*2,ac.currentTime,3.6,.03);
-      for(var i=0;i<4;i++)note(notes[(k*3+i*2)%notes.length],ac.currentTime+i*.9+.2,1.8,.05);
-      k++;
-    }
-    bar();timer=setInterval(bar,3600);
+  /* ---------- background music (assets/tere-bina-na-guzara-ae.mp3) ---------- */
+  var audio=$('bgAudio'),playing=false,snd=$('sound'),VOL=.24,fadeT=null;
+  function fadeTo(v,ms,cb){
+    clearInterval(fadeT);var s=audio.volume,t0=Date.now();
+    fadeT=setInterval(function(){var k=Math.min(1,(Date.now()-t0)/ms);audio.volume=Math.max(0,Math.min(1,s+(v-s)*k));if(k>=1){clearInterval(fadeT);cb&&cb()}},40);
   }
   function music(on){
-    try{
-      if(on){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();if(!timer)chordLoop();playing=true;snd.classList.remove('muted')}
-      else{clearInterval(timer);timer=null;playing=false;snd.classList.add('muted')}
-    }catch(e){snd.classList.add('muted')}
+    if(on){
+      playing=true;snd.classList.remove('muted');
+      audio.volume=0;var p=audio.play();fadeTo(VOL,3000);
+      if(p&&p.catch)p.catch(function(){playing=false;snd.classList.add('muted')});
+    }else{playing=false;snd.classList.add('muted');fadeTo(0,400,function(){if(!playing)audio.pause()})}
   }
   snd.classList.add('muted');
   snd.addEventListener('click',function(){music(!playing)});
@@ -307,12 +338,21 @@ var CONFIG = {
       s:(big?4:2.5)+Math.random()*(big?6:4.5),a:1,d:.016+Math.random()*.02,r:Math.random()*6.28,vr:(Math.random()-.5)*.12,c:skCols[Math.random()*skCols.length|0]});
     if(!srun){srun=true;requestAnimationFrame(skLoop)}
   }
+  // gold foil flakes that fly off the scratch card
+  var flakeCols=['#e6cd86','#c9a45f','#f3e2b4','#9b7435','#fff1c7'];
+  function flakes(x,y,n){
+    if(reduce)return;
+    for(var i=0;i<n;i++)sp.push({f:1,x:x+(Math.random()-.5)*14,y:y+(Math.random()-.5)*14,vx:(Math.random()-.5)*3.2,vy:-Math.random()*2.2-.4,
+      s:1.4+Math.random()*2.6,a:1,d:.014+Math.random()*.012,r:Math.random()*6.28,vr:(Math.random()-.5)*.35,c:flakeCols[Math.random()*flakeCols.length|0]});
+    if(!srun){srun=true;requestAnimationFrame(skLoop)}
+  }
   function skLoop(){
     sx.clearRect(0,0,innerWidth,innerHeight);
     for(var i=sp.length-1;i>=0;i--){
-      var p=sp[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.012;p.r+=p.vr;p.a-=p.d;
+      var p=sp[i];p.x+=p.vx;p.y+=p.vy;p.vy+=p.f?.17:.012;p.r+=p.vr;p.a-=p.d;
       if(p.a<=0){sp.splice(i,1);continue}
       sx.save();sx.translate(p.x,p.y);sx.rotate(p.r);sx.globalAlpha=Math.max(0,p.a);
+      if(p.f){sx.fillStyle=p.c;sx.beginPath();sx.moveTo(-p.s,-p.s*.6);sx.lineTo(p.s*.8,-p.s*.4);sx.lineTo(p.s*.5,p.s*.7);sx.lineTo(-p.s*.7,p.s*.5);sx.closePath();sx.fill();sx.restore();continue}
       sx.fillStyle=p.c;sx.shadowColor='#f0c878';sx.shadowBlur=8;
       var r=p.s*(.5+p.a*.5),k=r*.28;
       sx.beginPath();sx.moveTo(0,-r);sx.lineTo(k,-k);sx.lineTo(r,0);sx.lineTo(k,k);sx.lineTo(0,r);sx.lineTo(-k,k);sx.lineTo(-r,0);sx.lineTo(-k,-k);sx.closePath();sx.fill();
@@ -363,7 +403,15 @@ var CONFIG = {
       var z=4+Math.random()*8;t.style.width=t.style.height=z+'px';t.style.animationDelay=(Math.random()*3)+'s';env.insertBefore(t,env.firstChild)}
   })();
 
-  /* ---------- open the door ---------- */
+  /* ---------- gold dust rising across the page ---------- */
+  if(!reduce){
+    for(var di=0;di<34;di++){var dz=document.createElement('i'),dsz=(1.5+Math.random()*2).toFixed(1)+'px';
+      dz.style.left=(Math.random()*100).toFixed(1)+'%';dz.style.width=dz.style.height=dsz;
+      dz.style.setProperty('--dx',((Math.random()-.5)*120).toFixed(0)+'px');
+      dz.style.animationDuration=(12+Math.random()*12).toFixed(1)+'s';dz.style.animationDelay='-'+(Math.random()*24).toFixed(1)+'s';
+      $('dust').appendChild(dz)}
+  }
+
   document.body.classList.add('locked');
   var opened=false;
   function open(){
@@ -371,8 +419,18 @@ var CONFIG = {
     $('env').classList.add('opening');
     $('envelope').classList.add('open');
     music(true);
+    setTimeout(function(){document.body.classList.add('entered')},reduce?0:1700);
     setTimeout(function(){$('env').classList.add('gone');document.body.classList.remove('locked');scrollTo(0,0);snd.classList.add('on');fall()},reduce?50:1800);
   }
   $('envelope').addEventListener('click',open);
 })();
+
+
+
+
+
+
+
+
+
 
