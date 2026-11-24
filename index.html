@@ -4,6 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Abid &amp; Ayesha Wedding Invitation</title>
+  <meta name="description" content="With the blessings of Allah, Abid &amp; Ayesha joyfully invite you to their wedding celebration. Open your invitation.">
+  <meta name="theme-color" content="#0a1b38">
+  <!-- link preview (WhatsApp / Facebook / iMessage). og:image must be a full https:// address: replace the placeholder host below with your live site address -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Abid &amp; Ayesha | Wedding Invitation">
+  <meta property="og:description" content="You are warmly invited. Open the door to your invitation.">
+  <meta property="og:image" content="assets/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&family=Amiri:wght@400;700&display=swap">
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -25,13 +37,14 @@
     <div class="hint">Tap the door to open your invitation</div>
   </div>
 
-  <audio id="bgAudio" src="assets/tere-bina-na-guzara-ae.mp3" loop preload="auto"></audio>
+  <audio id="bgAudio" src="assets/tere-bina-na-guzara-ae.mp3" loop preload="metadata"></audio>
   <canvas id="petals" aria-hidden="true"></canvas>
   <canvas id="spark" aria-hidden="true"></canvas>
   <div class="dust" id="dust" aria-hidden="true"></div>
-  <button class="sound" id="sound" aria-label="Toggle background music">
+  <button class="sound" id="sound" aria-label="Toggle background music" title="Music on / off">
     <span class="snd bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
     <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="m17 9 5 6M22 9l-5 6"/></svg>
+    <span class="snd-label" aria-hidden="true">Music</span>
   </button>
 
   <main class="page" id="page">
@@ -41,12 +54,14 @@
       <p class="small rise d1" style="margin-bottom:10px">A Wedding Celebration</p>
       <div class="names rise d2"><span id="n1"></span><span class="amp">&amp;</span><span id="n2"></span></div>
       <p class="lead rise d5" id="tagline"></p>
+      <div class="scroll-hint rise d6" aria-hidden="true"><span>Please scroll</span><i></i></div>
     </section>
 
     <section class="rule">
       <div class="arabic dua" style="font-size:26px">الحمد لله</div>
       <p class="small">In the Name of Allah</p>
       <h2>A Blessed Beginning</h2>
+      <p class="dear" id="dear" hidden></p>
       <p id="welcome"></p>
       <div class="names" style="font-size:52px;margin:10px 0 14px" id="wNames"></div>
       <p id="welcomeNote"></p>
@@ -65,9 +80,8 @@
     </section>
 
     <section class="rule">
-      <p class="small">A Little Surprise</p>
-      <h2>Scratch to Reveal</h2>
-      <p class="small" style="letter-spacing:.16em">Reveal the blessed date with your finger</p>
+      <p class="small" style="letter-spacing:.16em">Join us to celebrate and meet the newlyweds on</p>
+      <h2>Scratch to Reveal the Date</h2>
       <div class="scratch-wrap" id="sw">
         <svg class="heart-outline" viewBox="0 0 300 276" aria-hidden="true"><defs><linearGradient id="hf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#244d8a"/><stop offset="1" stop-color="#0f2447"/></linearGradient></defs><path id="hp" d="" fill="url(#hf)" stroke="#e6cf9e" stroke-width="2" stroke-linejoin="round"/></svg>
         <div class="scratch-under">
@@ -82,11 +96,13 @@
       </div>
       <p class="scratch-progress" id="scProg" aria-live="polite">0% revealed</p>
       <div class="after" id="after">
-        <a class="btn" id="calbtn" href="#" target="_blank" rel="noopener">Add to calendar</a>
+        <a class="btn" id="calbtn" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.500" y="5" width="17" height="15.500" rx="2"/><path d="M3.500 10h17M8 3v4M16 3v4"/></svg>Add to Google Calendar</a>
       </div>
     </section>
 
     <section class="rule" id="gal" hidden>
+      <p class="small">A Glimpse of Us</p>
+      <h2>Moments</h2>
       <div class="gallery" id="galGrid"></div>
     </section>
 
@@ -112,14 +128,7 @@
       <h2>Venue</h2>
       <p class="big" id="vName"></p>
       <p id="vAddr"></p>
-      <a class="btn" id="mapbtn" href="#" target="_blank" rel="noopener">View on Google Maps</a>
-    </section>
-
-    <section class="rule">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M12 20.500S3.500 15 3.500 9.200A4.700 4.700 0 0 1 12 6.800a4.700 4.700 0 0 1 8.500 2.400C20.500 15 12 20.500 12 20.500z"/></svg>
-      <p class="small">A New Chapter Begins</p>
-      <h2>Our Story</h2>
-      <div class="story" id="story"></div>
+      <a class="btn" id="mapbtn" href="#" target="_blank" rel="noopener" hidden>View on Google Maps</a>
     </section>
 
     <section class="rule">
@@ -138,6 +147,13 @@
       </div>
     </section>
 
+    <section class="rule" id="rsvp" hidden>
+      <p class="small">Kindly Respond</p>
+      <h2>Will You Join Us?</h2>
+      <p>Let the family know you are coming. It opens a ready WhatsApp message.</p>
+      <div style="margin-top:18px"><a class="btn" id="rsvpbtn" href="#" target="_blank" rel="noopener">Confirm on WhatsApp</a></div>
+    </section>
+
     <section class="rule">
       <div class="arabic dua">بَارَكَ اللَّهُ لَكُمَا وَبَارَكَ عَلَيْكُمَا وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ</div>
       <p style="font-style:italic;max-width:320px;margin:0 auto">May Allah bless you both, shower His blessings upon you, and unite you in goodness.</p>
@@ -149,7 +165,6 @@
       <p class="small" id="fDate" style="margin-top:14px"></p>
       <p style="font-style:italic">Please remember us in your duas.</p>
       <p style="font-size:17px;margin-top:8px" id="hosts"></p>
-      <p class="love-note" id="loveNote">Lots of love to you both</p>
       <p class="credit" id="madeBy">Designed &amp; crafted by <b>Arsh</b></p>
     </footer>
   </main>

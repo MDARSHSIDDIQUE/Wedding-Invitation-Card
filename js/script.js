@@ -4,9 +4,9 @@ var CONFIG = {
   couple: [
     // name = short name used across the card; fullName, parent and address show in "The Couple" section
     { name: "Abid",   role: "The Groom", fullName: "Mohd Abid Hafiz", relation: "Son of",      parent: "Late Md. Hafizur Rahman",
-      address: "Raja Bari, K. Hat, Purnea" },
+      address: "" },
     { name: "Ayesha", role: "The Bride", fullName: "Ayesha Naaz",     relation: "Daughter of", parent: "Mohammad Chand",
-      address: "H.No. 29/30, Muslim Basti, Golmuri, Jamshedpur (Jharkhand)" }
+      address: "" }
   ],
   // Events. "start" uses India time (+05:30). These are sample dates, change them.
   events: [
@@ -18,19 +18,14 @@ var CONFIG = {
   durationHours: 4,                    // length of the last event, for the calendar
   venueName: "The Rose Banquet",
   venueAddress: "Madhopara, Purnea, Bihar",
-  mapQuery: "The Rose Banquet, Madhopara, Purnea, Bihar",
+  mapUrl: "",                          // paste the Google Maps "Share" link of the venue here. Leave empty to hide the Maps button.
+  rsvpPhone: "",                       // WhatsApp number with country code, digits only, e.g. "919876543210". Leave empty to hide RSVP.
   tagline: "Two hearts. One beautiful beginning. A lifetime, Insha’Allah.",
   welcome: "In the name of Allah, the Most Merciful, the Most Compassionate, we request the honour of your presence at the Nikah ceremony of",
   welcomeNote: "As two hearts begin a beautiful journey together, your presence and prayers will make this blessed occasion even more special.",
-  // Our Story milestones (sample text, replace with your own). Add or remove items freely.
-  story: [
-    { when: "Chapter One",   title: "Where It Began",     text: "A few warm words about how Abid and Ayesha first met." },
-    { when: "Chapter Two",   title: "Two Families, One Dua", text: "The day both families met and said yes, alhamdulillah." },
-    { when: "Chapter Three", title: "Forever Begins",     text: "Now we begin our journey together, and we want you with us." }
-  ],
   transport: "Parking is available at the venue. For help with rides or pickups, please contact the family.",
   accommodation: "Rooms for out-of-town guests are arranged nearby. Please let us know in advance.",
-  photos: [],                          // optional photo URLs / data URIs shown after the scratch card
+  photos: [],                          // photo files, e.g. ["assets/photos/1.jpg","assets/photos/2.jpg"]. Empty = no gallery.
   hosts: "With love, the families of Abid & Ayesha"
 };
 /* ================================================= */
@@ -40,6 +35,8 @@ var CONFIG = {
   var C=CONFIG, NS="http://www.w3.org/2000/svg";
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   var dpr=Math.min(2,window.devicePixelRatio||1);
+  // low-end phones get fewer petals/dust so the card stays smooth
+  var lite=(navigator.deviceMemory&&navigator.deviceMemory<=2)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4);
   var A=C.couple[0].name,B=C.couple[1].name;
   var ev=C.events.slice().sort(function(a,b){return new Date(a.start)-new Date(b.start)});
   var main=ev.filter(function(e){return e.name===C.mainEvent})[0]||ev.filter(function(e){return /nikah/i.test(e.name)})[0]||ev[0];
@@ -65,12 +62,16 @@ var CONFIG = {
   $('tagline').textContent=C.tagline;
   $('welcome').textContent=C.welcome; $('wNames').textContent=A+" & "+B; $('welcomeNote').textContent=C.welcomeNote;
   $('vName').textContent=C.venueName; $('vAddr').textContent=C.venueAddress;
-  $('mapbtn').href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(C.mapQuery);
   $('transport').textContent=C.transport;
   if(C.accommodation)$('accom').textContent=C.accommodation;else $('stay').hidden=true;
   $('sign').textContent=A+" & "+B; $('hosts').textContent=C.hosts;
   document.title=A+" & "+B+" Wedding Invitation";
-  (C.story||[]).forEach(function(s){var d=document.createElement('div');d.className='st';d.innerHTML='<div class="y"></div><div class="h"></div><div class="b"></div>';d.querySelector('.y').textContent=s.when;d.querySelector('.h').textContent=s.title;d.querySelector('.b').textContent=s.text;$('story').appendChild(d)});
+  if(C.mapUrl){$('mapbtn').href=C.mapUrl;$('mapbtn').hidden=false}
+
+  /* ---------- personal greeting: add ?guest=Name to the link ---------- */
+  var guest="";
+  try{guest=(new URLSearchParams(location.search).get('guest')||'').replace(/\s+/g,' ').trim().slice(0,40)}catch(e){}
+  if(guest){$('dear').textContent="Dear "+guest+",";$('dear').hidden=false}
 
   var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   var days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -79,7 +80,7 @@ var CONFIG = {
   var sd=ist(start);
   $('dDate').textContent=String(sd.getUTCDate()).padStart(2,'0') + " " + months[sd.getUTCMonth()] + " " + sd.getUTCFullYear();
   $('dDay').textContent=clock(start) + " · " + C.venueName;
-  $('fDate').textContent=String(sd.getUTCDate()).padStart(2,'0')+" "+months[sd.getUTCMonth()]+" "+sd.getUTCFullYear()+" · "+clock(start);
+  $('fDate').textContent=(function(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])})(sd.getUTCDate());
 
   var ICONS={
     hand:'<path d="M7.500 12.500V6.800a1.250 1.250 0 0 1 2.500 0V11M10 11V4.800a1.250 1.250 0 0 1 2.500 0V11M12.500 11V5.600a1.250 1.250 0 0 1 2.500 0v5.900M15 11.500V8a1.250 1.250 0 0 1 2.500 0v5.500c0 4-2.400 7-6 7-2.600 0-4-1.300-5.300-3.400L4 13.600a1.300 1.300 0 0 1 2-1.600l1.500 1.600"/><circle cx="11.800" cy="15.600" r="1.500"/><g fill="currentColor" stroke="none"><circle cx="11.800" cy="12.700" r=".5"/><circle cx="9.200" cy="15.600" r=".5"/><circle cx="14.400" cy="15.600" r=".5"/><circle cx="11.800" cy="18.400" r=".5"/></g>',
@@ -109,7 +110,14 @@ var CONFIG = {
   if(reduce){evWrap.style.setProperty('--tl',1);evWrap.querySelectorAll('.ev').forEach(function(e){e.classList.add('lit')})}
   else{var tlq=false;addEventListener('scroll',function(){if(!tlq){tlq=true;requestAnimationFrame(function(){tlq=false;tl()})}},{passive:true});addEventListener('resize',tl);tl()}
 
-  if(C.photos&&C.photos.length){C.photos.forEach(function(u){var i=new Image();i.src=u;i.alt="";$('galGrid').appendChild(i)});$('gal').hidden=false}
+  if(C.photos&&C.photos.length){C.photos.forEach(function(u){var i=new Image();i.loading="lazy";i.decoding="async";i.src=u;i.alt="Abid and Ayesha";$('galGrid').appendChild(i)});$('gal').hidden=false}
+
+  /* ---------- RSVP on WhatsApp ---------- */
+  if(C.rsvpPhone){
+    var rsvpMsg="Assalamu Alaikum, "+(guest?"this is "+guest+". ":"")+"I would love to attend "+A+" & "+B+"'s wedding ("+sd.getUTCDate()+" "+months[sd.getUTCMonth()]+" "+sd.getUTCFullYear()+"), Insha’Allah.";
+    $('rsvpbtn').href="https://wa.me/"+String(C.rsvpPhone).replace(/\D/g,'')+"?text="+encodeURIComponent(rsvpMsg);
+    $('rsvp').hidden=false;
+  }
 
   function g(d){return d.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'')}
   $('calbtn').href="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(A+" & "+B+" Wedding")+
@@ -232,6 +240,12 @@ var CONFIG = {
     return s;
   }
   $('heroArt').innerHTML=heroArt();
+  // "Please scroll" sits inside the mosque dome. The art is scaled (slice, bottom-aligned), so convert its 400x800 units to pixels
+  (function(){
+    var hero=document.querySelector('.hero'),hint=hero.querySelector('.scroll-hint');
+    function place(){var k=Math.max(hero.offsetWidth/400,hero.offsetHeight/800);hint.style.bottom=Math.round((800-604)*k)+'px'}
+    place();addEventListener('resize',place);
+  })();
 
   /* ---------- scratch card ---------- */
   function heart(w,h){
@@ -312,7 +326,7 @@ var CONFIG = {
   var heartCols=['#f0c878','#e6cd86','#f4c6c6','#fff4e6','#e8a7a7','#d9bd86'];
   function petal(x,y,vy,b){var c=b?heartCols:petalCols;return{x:x,y:y,vx:b?(Math.random()-.5)*9:0,vy:b?-(Math.random()*9+3):vy,r:b?Math.random()*5+4:Math.random()*5+5,a:Math.random()*6.28,va:(Math.random()-.5)*(b?.08:.04),fl:Math.random()*6.28,vfl:.02+Math.random()*.04,c:c[Math.random()*c.length|0],life:b?140:0,sw:Math.random()*6.28,burst:b}}
   function burst(){if(reduce)return;var r=sw.getBoundingClientRect();for(var i=0;i<60;i++)parts.push(petal(r.left+r.width/2,r.top+r.height*.45,0,true));run()}
-  function fall(){if(reduce)return;fallUntil=Date.now()+10000;for(var i=0;i<30;i++)parts.push(petal(Math.random()*innerWidth,-Math.random()*innerHeight,Math.random()*1.1+.5,false));run()}
+  function fall(){if(reduce)return;fallUntil=Date.now()+10000;for(var i=0;i<(lite?14:30);i++)parts.push(petal(Math.random()*innerWidth,-Math.random()*innerHeight,Math.random()*1.1+.5,false));run()}
   function drawHeart(r){px.moveTo(0,r*.9);px.bezierCurveTo(-r*1.2,0,-r*.9,-r,0,-r*.35);px.bezierCurveTo(r*.9,-r,r*1.2,0,0,r*.9)}
   function drawPetal(r){px.moveTo(0,r);px.bezierCurveTo(r*.95,r*.55,r*.8,-r*.75,r*.18,-r);px.quadraticCurveTo(0,-r*.78,-r*.18,-r);px.bezierCurveTo(-r*.8,-r*.75,-r*.95,r*.55,0,r)}
   function run(){if(running)return;running=true;requestAnimationFrame(loop)}
@@ -426,7 +440,7 @@ var CONFIG = {
 
   /* ---------- gold dust rising across the page ---------- */
   if(!reduce){
-    for(var di=0;di<34;di++){var dz=document.createElement('i'),dsz=(1.5+Math.random()*2).toFixed(1)+'px';
+    for(var di=0;di<(lite?12:34);di++){var dz=document.createElement('i'),dsz=(1.5+Math.random()*2).toFixed(1)+'px';
       dz.style.left=(Math.random()*100).toFixed(1)+'%';dz.style.width=dz.style.height=dsz;
       dz.style.setProperty('--dx',((Math.random()-.5)*120).toFixed(0)+'px');
       dz.style.animationDuration=(12+Math.random()*12).toFixed(1)+'s';dz.style.animationDelay='-'+(Math.random()*24).toFixed(1)+'s';
