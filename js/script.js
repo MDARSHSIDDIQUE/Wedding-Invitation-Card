@@ -133,6 +133,15 @@ var CONFIG = {
     if(o===undefined||reduce){el.innerHTML=flipHTML(v,v);return}
     el.innerHTML=flipHTML(o,v);var f=el.firstChild;void f.offsetWidth;f.classList.add('go');
     setTimeout(function(){if(cur[id]===v)el.innerHTML=flipHTML(v,v)},650);
+    if(id==='cs')secGlow(el.parentElement);
+  }
+  // every second: the seconds box glows and drops a couple of gold sparkles
+  function secGlow(box){
+    if(box.classList.contains('rv'))return;
+    box.classList.remove('tk');void box.offsetWidth;box.classList.add('tk');
+    if(!document.body.classList.contains('entered')||document.hidden)return;
+    var r=box.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;
+    spawn(r.left+r.width*(.25+Math.random()*.5),r.top+4,2,false);
   }
   function tick(){
     var s=Math.max(0,Math.floor((start-new Date())/1000));
@@ -174,7 +183,28 @@ var CONFIG = {
 
   /* ---------- section dividers draw themselves ---------- */
   var drawIO=(!reduce&&'IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('drawn');drawIO.unobserve(e.target)}})},{threshold:.15}):null;
-  document.querySelectorAll('section.rule').forEach(function(s){if(drawIO)drawIO.observe(s);else s.classList.add('drawn')});
+  document.querySelectorAll('section.rule, main footer').forEach(function(s){if(drawIO)drawIO.observe(s);else s.classList.add('drawn')});
+
+  /* ---------- Arabic duas write in right-to-left; footer names + designer signature write in ---------- */
+  if(!reduce){
+    document.querySelectorAll('.dua, .hero .bismillah').forEach(function(el){el.classList.add('wr')});
+    $('sign').classList.add('wl');
+    var sig=document.querySelector('#madeBy b');if(sig)sig.classList.add('wl','late');
+  }
+
+  /* ---------- a line of light traces the gold border of each card ---------- */
+  if(!reduce&&'IntersectionObserver' in window){
+    var trIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('traced');trIO.unobserve(e.target)}})},{threshold:.35});
+    var tn={};
+    document.querySelectorAll('.info, .events .ev, .count>div').forEach(function(el){
+      var k=el.parentElement.id||el.parentElement.className;tn[k]=tn[k]||0;
+      el.classList.add('trace');el.style.setProperty('--td',(.35+tn[k]*.12).toFixed(2)+'s');tn[k]++;
+      trIO.observe(el);
+    });
+  }
+
+  /* ---------- buttons: a small burst of hearts and gold when tapped ---------- */
+  ['calbtn','rsvpbtn'].forEach(function(id){$(id).addEventListener('click',function(){burstAt(this,id==='rsvpbtn'?44:30)})});
 
   /* ---------- Islamic hero illustration ---------- */
   var ST='fill="none" stroke="#d9bd86" stroke-opacity=".85" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"';
@@ -228,12 +258,18 @@ var CONFIG = {
     s+='<ellipse cx="200" cy="360" rx="150" ry="230" fill="url(#glow)"/>';
     s+='<path d="M34 700V340C34 220 150 150 200 80C250 150 366 220 366 340V700" '+ST+' stroke-width="1.6"/>';
     s+='<path d="M48 700V340C48 232 156 166 200 104C244 166 352 232 352 340V700" '+ST+' stroke="'+GD+'" stroke-width="1"/>';
-    // night sky: tiny twinkling stars, each on its own rhythm
+    // night sky: tiny twinkling stars, each on its own rhythm. The whole sky sits in .px-sky so it can drift slower than the page (parallax)
+    s+='<g class="px-sky">';
     for(var si=0;si<46;si++)s+='<circle class="sky" cx="'+(Math.random()*400).toFixed(1)+'" cy="'+(6+Math.random()*500).toFixed(1)+'" r="'+(.5+Math.random()*1.1).toFixed(2)+'" fill="#fff3d6" style="animation-delay:-'+(Math.random()*4).toFixed(2)+'s;animation-duration:'+(2.5+Math.random()*3).toFixed(2)+'s"/>';
     s+='<g class="shoot"><path d="M0 0L-80 -30" stroke="url(#shootG)" stroke-width="1.600" stroke-linecap="round"/><circle r="1.700" fill="#fff6dc"/></g>';
     s+='<circle class="moonglow" cx="200" cy="42" r="44" fill="url(#moonG)"/>';
     s+='<rect width="400" height="100" fill="'+GD+'" mask="url(#mkMoon)"/>'+star8(234,34,8,'#e6cf9e')+'<g class="htw">'+star8(120,48,5,'#e6cf9e')+star8(22,200,5,'#e6cf9e')+'</g><g class="htw htw2">'+star8(300,62,4,'#e6cf9e')+star8(380,214,5,'#e6cf9e')+'</g>';
-    s+='<g class="sway"><g class="lan-c">'+lantern(200,104,12,.72)+'</g></g>'+lantern(62,0,44,.62)+lantern(340,0,78,.55);
+    s+='</g>';
+    // lanterns: .drop lowers them in when the door opens, .swing rocks them as the page scrolls
+    var D=reduce?'':'drop';
+    s+='<g class="'+D+'" style="animation-delay:.9s"><g class="swing" style="transform-origin:200px 104px"><g class="sway"><g class="lan-c">'+lantern(200,104,12,.72)+'</g></g></g></g>';
+    s+='<g class="'+D+'" style="animation-delay:.3s"><g class="swing" style="transform-origin:62px 0px">'+lantern(62,0,44,.62)+'</g></g>';
+    s+='<g class="'+D+'" style="animation-delay:.6s"><g class="swing" style="transform-origin:340px 0px">'+lantern(340,0,78,.55)+'</g></g>';
     s+=mosque();
     s+='<g '+ST+'><path d="M-10 700H410M-10 716H410" /></g>';
     s+=star8(120,740,6,'#e6cf9e')+star8(200,744,7,'#e6cf9e')+star8(280,740,6,'#e6cf9e');
@@ -246,6 +282,31 @@ var CONFIG = {
     function place(){var k=Math.max(hero.offsetWidth/400,hero.offsetHeight/800);hint.style.bottom=Math.round((800-604)*k)+'px'}
     place();addEventListener('resize',place);
   })();
+
+  /* ---------- parallax sky + lanterns that swing when you scroll ---------- */
+  if(!reduce){
+    (function(){
+      var hero=document.querySelector('.hero'),sky=document.querySelector('#heroArt .px-sky');
+      var sw=[].slice.call(document.querySelectorAll('#heroArt .swing'));
+      var lastY=scrollY,ang=0,vel=0,on=false;
+      function frame(){
+        var y=scrollY,hh=hero.offsetHeight,dy=y-lastY;lastY=y;
+        if(y<hh+200){var k=Math.max(hero.offsetWidth/400,hh/800);sky.style.transform='translateY('+(y*.35/k).toFixed(1)+'px)'}
+        // a damped spring: scrolling pushes the lanterns, then they settle back
+        vel=(vel-dy*.006-ang*.012)*.95;ang=Math.max(-8,Math.min(8,ang+vel));
+        sw.forEach(function(g,i){g.style.transform='rotate('+(ang*(i?.8:1)).toFixed(2)+'deg)'});
+        if(dy!==0||Math.abs(ang)>.03||Math.abs(vel)>.01)requestAnimationFrame(frame);else on=false;
+      }
+      addEventListener('scroll',function(){if(!on&&scrollY<hero.offsetHeight*1.6){on=true;requestAnimationFrame(frame)}},{passive:true});
+    })();
+  }
+
+  /* ---------- two small lanterns lower into the Qur'an verse and closing dua sections ---------- */
+  document.querySelectorAll('section[data-lan]').forEach(function(s){
+    ['l','r'].forEach(function(side){
+      s.insertAdjacentHTML('afterbegin','<svg class="sec-lan '+side+'" viewBox="0 0 60 110" aria-hidden="true">'+lantern(30,0,50,.55)+'</svg>');
+    });
+  });
 
   /* ---------- scratch card ---------- */
   function heart(w,h){
@@ -302,6 +363,8 @@ var CONFIG = {
     sc.style.transition='opacity .8s';sc.style.opacity='0';sc.style.pointerEvents='none';
     sw.classList.add('revealed');prog.textContent='Revealed ✦';
     $('after').classList.add('on');burst();
+    // the big moment: gold sparkles burst from the heart, then rose and gold petals rain from the top
+    if(!reduce){var hr=sw.getBoundingClientRect();spawn(hr.left+hr.width/2,hr.top+hr.height*.45,26,true);setTimeout(function(){fall(6500,lite?20:44)},250)}
   }
   // only a touch that starts on the gold heart scratches; the empty corners around it scroll the page like normal
   function inHeart(cx,cy){if(!heartPath)return false;var r=sc.getBoundingClientRect(),k=W/r.width;return ctx.isPointInPath(heartPath,(cx-r.left)*k*dpr,(cy-r.top)*k*dpr)}
@@ -326,7 +389,8 @@ var CONFIG = {
   var heartCols=['#f0c878','#e6cd86','#f4c6c6','#fff4e6','#e8a7a7','#d9bd86'];
   function petal(x,y,vy,b){var c=b?heartCols:petalCols;return{x:x,y:y,vx:b?(Math.random()-.5)*9:0,vy:b?-(Math.random()*9+3):vy,r:b?Math.random()*5+4:Math.random()*5+5,a:Math.random()*6.28,va:(Math.random()-.5)*(b?.08:.04),fl:Math.random()*6.28,vfl:.02+Math.random()*.04,c:c[Math.random()*c.length|0],life:b?140:0,sw:Math.random()*6.28,burst:b}}
   function burst(){if(reduce)return;var r=sw.getBoundingClientRect();for(var i=0;i<60;i++)parts.push(petal(r.left+r.width/2,r.top+r.height*.45,0,true));run()}
-  function fall(){if(reduce)return;fallUntil=Date.now()+10000;for(var i=0;i<(lite?14:30);i++)parts.push(petal(Math.random()*innerWidth,-Math.random()*innerHeight,Math.random()*1.1+.5,false));run()}
+  function burstAt(el,n){if(reduce)return;var r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;for(var i=0;i<n;i++)parts.push(petal(x,y,0,true));run();spawn(x,y,18,true)}
+  function fall(ms,n){if(reduce)return;fallUntil=Math.max(fallUntil,Date.now()+(ms||10000));n=n||(lite?14:30);for(var i=0;i<n;i++)parts.push(petal(Math.random()*innerWidth,-Math.random()*innerHeight,Math.random()*1.1+.5,false));run()}
   function drawHeart(r){px.moveTo(0,r*.9);px.bezierCurveTo(-r*1.2,0,-r*.9,-r,0,-r*.35);px.bezierCurveTo(r*.9,-r,r*1.2,0,0,r*.9)}
   function drawPetal(r){px.moveTo(0,r);px.bezierCurveTo(r*.95,r*.55,r*.8,-r*.75,r*.18,-r);px.quadraticCurveTo(0,-r*.78,-r*.18,-r);px.bezierCurveTo(-r*.8,-r*.75,-r*.95,r*.55,0,r)}
   function run(){if(running)return;running=true;requestAnimationFrame(loop)}
@@ -447,15 +511,51 @@ var CONFIG = {
       $('dust').appendChild(dz)}
   }
 
+  /* ---------- soft bell chime as the door opens (made in the browser, no sound file) ---------- */
+  function chime(){
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+      var ac=new AC(),t=ac.currentTime+.03,out=ac.createGain();out.gain.value=.14;out.connect(ac.destination);
+      [1318.5,1661.2,1975.5,2637].forEach(function(f,i){
+        var s=t+i*.14;
+        [[1,.5,1.9],[2.76,.1,.6]].forEach(function(h){ // a bell = base tone + a quick bright overtone
+          var o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f*h[0];
+          g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(h[1],s+.008);g.gain.exponentialRampToValueAtTime(.0001,s+h[2]);
+          o.connect(g);g.connect(out);o.start(s);o.stop(s+h[2]+.05);
+        });
+      });
+      setTimeout(function(){if(ac.close)ac.close()},3500);
+    }catch(e){}
+  }
+
+  /* ---------- a slow wave of light passes down the geometric background pattern ---------- */
+  function glint(){
+    if(reduce)return;
+    var page=$('page'),gl=document.createElement('div'),CYC=lite?15000:11000,SWEEP=.5,BAND=460,t0=performance.now();
+    gl.className='glint';gl.setAttribute('aria-hidden','true');page.insertBefore(gl,page.firstChild);
+    function f(now){
+      var ph=((now-t0)%CYC)/CYC;
+      if(ph>=SWEEP||document.hidden){gl.style.display='none';setTimeout(function(){requestAnimationFrame(f)},Math.max(200,(1-ph)*CYC));return}
+      var r=page.getBoundingClientRect(),y=-BAND+(ph/SWEEP)*(innerHeight+BAND);
+      gl.style.display='block';gl.style.left=r.left+'px';gl.style.width=r.width+'px';
+      gl.style.transform='translate3d(0,'+y.toFixed(1)+'px,0)';
+      gl.style.backgroundPosition='0 '+((r.top-y)%64).toFixed(1)+'px'; // keeps the bright tiles exactly on top of the page tiles
+      gl.style.opacity=(Math.sin(Math.PI*ph/SWEEP)*.9).toFixed(3);
+      requestAnimationFrame(f);
+    }
+    requestAnimationFrame(f);
+  }
+
   document.body.classList.add('locked');
   var opened=false;
   function open(){
     if(opened)return;opened=true;
     $('env').classList.add('opening');
     $('envelope').classList.add('open');
+    chime();
     music(true);
     setTimeout(function(){document.body.classList.add('entered')},reduce?0:1700);
-    setTimeout(function(){$('env').classList.add('gone');document.body.classList.remove('locked');scrollTo(0,0);snd.classList.add('on');fall()},reduce?50:1800);
+    setTimeout(function(){$('env').classList.add('gone');document.body.classList.remove('locked');scrollTo(0,0);snd.classList.add('on');fall();glint()},reduce?50:1800);
   }
   $('envelope').addEventListener('click',open);
 })();

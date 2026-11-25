@@ -358,3 +358,88 @@ footer .credit b{font-weight:700;color:var(--gold);letter-spacing:.3em}
 .sound.on .snd-label{animation:lbl 1s ease 8s forwards}
 @keyframes lbl{to{opacity:0}}
 .gallery img{aspect-ratio:4/5;object-fit:cover;background:#14305a}
+
+/* ===================== extra animations ===================== */
+/* JS adds .wr / .wl / .drop / .trace / .glint only when the viewer has not asked for reduced motion */
+
+/* 1. scratch reveal: the heart flares with gold light and the date pops */
+.scratch-wrap.revealed .heart-outline{animation:heartGlow 2.4s ease-out}
+@keyframes heartGlow{
+  0%,100%{filter:drop-shadow(0 14px 22px rgba(0,0,0,.45)) drop-shadow(0 0 0 rgba(240,200,120,0))}
+  30%{filter:drop-shadow(0 14px 22px rgba(0,0,0,.45)) drop-shadow(0 0 34px rgba(240,200,120,.85))}}
+.scratch-wrap.revealed .date{animation:datePop 1.2s cubic-bezier(.2,.7,.2,1) .3s}
+@keyframes datePop{40%{transform:scale(1.1);text-shadow:0 0 30px rgba(255,220,150,.95)}}
+
+/* 2. Arabic duas write themselves right-to-left (padding keeps the diacritics inside the mask) */
+.wr{-webkit-mask-image:linear-gradient(270deg,#000 40%,transparent 60%);mask-image:linear-gradient(270deg,#000 40%,transparent 60%);
+  -webkit-mask-size:260% 100%;mask-size:260% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:0 0;mask-position:0 0;
+  padding-block:.3em;margin-top:-.3em}
+.dua.wr{margin-bottom:calc(6px - .3em)}
+.hero .bismillah.wr{margin-bottom:calc(14px - .3em)}
+section.rule.drawn .dua.wr{animation:writeR 2.6s cubic-bezier(.45,.1,.3,1) .5s both}
+body.entered .hero .bismillah.wr{animation:rise 1.2s cubic-bezier(.2,.7,.2,1) both,writeR 2s cubic-bezier(.45,.1,.3,1) .2s both}
+@keyframes writeR{to{-webkit-mask-position:100% 0;mask-position:100% 0}}
+/* the ✦ divider keeps a soft gold glint after it spins in */
+section.rule.drawn::before{animation:glint 5s ease-in-out 1.4s infinite}
+@keyframes glint{0%,100%{filter:drop-shadow(0 0 0 rgba(255,220,150,0))}50%{filter:drop-shadow(0 0 7px rgba(255,220,150,.9))}}
+
+/* 3 + 5. hero lanterns lower in on entry (scroll swing + sky parallax are set from JS) */
+body.entered .drop{animation:drop 2s cubic-bezier(.25,1.3,.45,1) both}
+@keyframes drop{from{transform:translateY(-300px)}}
+.px-sky,.swing{will-change:transform}
+/* small lanterns hanging in the verse and closing-dua sections */
+.sec-lan{position:absolute;top:0;width:44px;height:auto;aspect-ratio:60/110;pointer-events:none;transform-origin:50% 0;opacity:0}
+.sec-lan.l{left:12px}.sec-lan.r{right:12px}
+section.drawn .sec-lan{opacity:1;animation:dropS 1.8s cubic-bezier(.25,1.35,.45,1) both,lsway 5s ease-in-out 1.8s infinite}
+section.drawn .sec-lan.r{animation-delay:.25s,2.05s;animation-duration:1.8s,5.6s}
+@keyframes dropS{from{transform:translateY(-140px)}}
+@keyframes lsway{0%,100%{transform:rotate(0)}25%{transform:rotate(3deg)}75%{transform:rotate(-3deg)}}
+
+/* 4. countdown: the seconds box glows on every tick */
+.count div{position:relative}
+.count div.tk{animation:tk .9s ease-out}
+@keyframes tk{0%{border-color:#f3e2b4;box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 0 0 rgba(240,200,120,.55),0 0 16px rgba(240,200,120,.35)}
+  100%{box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 0 9px rgba(240,200,120,0),0 0 0 rgba(240,200,120,0)}}
+
+/* 6. a line of light runs around each card's gold border: top, down both sides, then the bottom closes */
+.info{position:relative}
+.trace::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:0;
+  background:linear-gradient(#fff1c7,#fff1c7) top center/0 1.5px no-repeat,
+    linear-gradient(#fff1c7,#fff1c7) left top/1.5px 0 no-repeat,
+    linear-gradient(#fff1c7,#fff1c7) right top/1.5px 0 no-repeat,
+    linear-gradient(#fff1c7,#fff1c7) left bottom/0 1.5px no-repeat,
+    linear-gradient(#fff1c7,#fff1c7) right bottom/0 1.5px no-repeat;
+  filter:drop-shadow(0 0 4px rgba(240,200,120,.9))}
+.trace.traced::after{animation:trace 1.9s cubic-bezier(.5,0,.3,1) var(--td,0s) both}
+@keyframes trace{
+  0%{opacity:1;background-size:0 1.5px,1.5px 0,1.5px 0,0 1.5px,0 1.5px}
+  32%{background-size:100% 1.5px,1.5px 0,1.5px 0,0 1.5px,0 1.5px}
+  66%{background-size:100% 1.5px,1.5px 100%,1.5px 100%,0 1.5px,0 1.5px}
+  84%{opacity:1;background-size:100% 1.5px,1.5px 100%,1.5px 100%,50% 1.5px,50% 1.5px}
+  100%{opacity:0;background-size:100% 1.5px,1.5px 100%,1.5px 100%,50% 1.5px,50% 1.5px}}
+
+/* 8. light wave over the background pattern: a brighter copy of the tile, shown in a soft moving band behind the content */
+.glint{position:fixed;top:0;left:0;height:460px;display:none;pointer-events:none;z-index:0;will-change:transform,opacity;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23f3dca0' stroke-opacity='.42' stroke-width='1.1'%3E%3Cpath d='M32 8 56 32 32 56 8 32ZM14.300 14.300H49.700V49.700H14.300Z'/%3E%3Ccircle cx='0' cy='0' r='3'/%3E%3Ccircle cx='64' cy='0' r='3'/%3E%3Ccircle cx='0' cy='64' r='3'/%3E%3Ccircle cx='64' cy='64' r='3'/%3E%3C/svg%3E") 0 0/64px 64px;
+  -webkit-mask-image:linear-gradient(165deg,transparent 8%,#000 45%,#000 55%,transparent 92%);mask-image:linear-gradient(165deg,transparent 8%,#000 45%,#000 55%,transparent 92%)}
+.page>section,.page>footer{z-index:1}
+
+/* 10. footer: the couple's names and the designer's signature write in */
+footer .credit b{display:inline-block;font-family:var(--script);font-weight:400;font-size:26px;letter-spacing:.02em;text-transform:none;vertical-align:-4px;margin-left:3px;opacity:1}
+.wl{-webkit-mask-image:linear-gradient(90deg,#000 40%,transparent 60%);mask-image:linear-gradient(90deg,#000 40%,transparent 60%);
+  -webkit-mask-size:260% 100%;mask-size:260% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:100% 0;mask-position:100% 0;
+  padding:.1em .3em .25em;margin:-.1em -.3em -.25em}
+footer.drawn .wl{animation:write 1.8s cubic-bezier(.45,.1,.3,1) .4s both}
+footer.drawn .wl.late{animation-duration:1.4s;animation-delay:2s}
+footer .credit b.wl{margin-left:calc(3px - .3em)}
+
+@media (max-width:480px){
+  .hero .bismillah.wr{margin-bottom:calc(8px - .3em)}
+  .sec-lan{width:40px}
+  .sec-lan.l{left:8px}.sec-lan.r{right:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  section.rule.drawn::before{animation:none}
+  .sec-lan{animation:none!important;opacity:1}
+  .scratch-wrap.revealed .heart-outline,.scratch-wrap.revealed .date{animation:none}
+}
