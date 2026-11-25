@@ -80,7 +80,7 @@ var CONFIG = {
   var sd=ist(start);
   $('dDate').textContent=String(sd.getUTCDate()).padStart(2,'0') + " " + months[sd.getUTCMonth()] + " " + sd.getUTCFullYear();
   $('dDay').textContent=clock(start) + " · " + C.venueName;
-  $('fDate').textContent=(function(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])})(sd.getUTCDate());
+  $('fDate').textContent=days[sd.getUTCDay()] + " · " + (function(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])})(sd.getUTCDate()) + " " + months[sd.getUTCMonth()] + " " + sd.getUTCFullYear();
 
   var ICONS={
     hand:'<path d="M7.500 12.500V6.800a1.250 1.250 0 0 1 2.500 0V11M10 11V4.800a1.250 1.250 0 0 1 2.500 0V11M12.500 11V5.600a1.250 1.250 0 0 1 2.500 0v5.900M15 11.500V8a1.250 1.250 0 0 1 2.500 0v5.500c0 4-2.400 7-6 7-2.600 0-4-1.300-5.300-3.400L4 13.600a1.300 1.300 0 0 1 2-1.600l1.500 1.600"/><circle cx="11.800" cy="15.600" r="1.500"/><g fill="currentColor" stroke="none"><circle cx="11.800" cy="12.700" r=".5"/><circle cx="9.200" cy="15.600" r=".5"/><circle cx="14.400" cy="15.600" r=".5"/><circle cx="11.800" cy="18.400" r=".5"/></g>',
